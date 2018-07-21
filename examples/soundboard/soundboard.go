@@ -71,13 +71,8 @@ func main() {
 			continue
 		}
 		router.On(
-			strings.TrimSuffix(
-				v.Name(),
-				path.Ext(v.Name()),
-			),
-			createMusicFunction(
-				filepath.Join(*fSoundDir, v.Name()),
-			),
+			trimExtension(v.Name()),
+			createMusicFunction(filepath.Join(*fSoundDir, v.Name())),
 		).Desc("plays " + v.Name())
 	}
 
