@@ -13,7 +13,7 @@ If the file extension ends in .json, the bot will create a command that will use
 ```
 
 ## Dependencies
-This bot depends on [ffmpeg](ffmpeg.org) to transcode the audio to opus.
+This bot depends on [ffmpeg](https://ffmpeg.org) to transcode the audio to opus.
 It should be installed to your path.
 
 [Here is a guide for installing on windows](https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg)
