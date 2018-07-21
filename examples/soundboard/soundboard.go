@@ -90,7 +90,7 @@ func main() {
 			}
 		}
 		s.Unlock()
-	})
+	}).Desc("Leaves the current voice channel")
 
 	// Create help route and set it to the default route for bot mentions
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
