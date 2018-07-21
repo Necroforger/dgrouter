@@ -85,6 +85,26 @@ func (r *Route) Find(name string) *Route {
 	return nil
 }
 
+// FindFull a full path of routes by searching through their subroutes
+// Until the deepest match is found.
+// It will return the route matched and the depth it was found at
+//     args : path of route you wish to find
+//            ex. FindFull(command, subroute1, subroute2, nonexistent)
+//            will return the deepest found match, which will be subroute2
+func (r *Route) FindFull(args ...string) (*Route, int) {
+	nr := r
+	i := 0
+	for _, v := range args {
+		if rt := nr.Find(v); rt != nil {
+			nr = rt
+			i++
+		} else {
+			break
+		}
+	}
+	return nr, i
+}
+
 // New returns a new route
 func New() *Route {
 	return &Route{

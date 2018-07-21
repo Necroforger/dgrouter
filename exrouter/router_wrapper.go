@@ -80,35 +80,9 @@ func (r *Route) FindAndExecute(s *discordgo.Session, prefix string, botID string
 	command := strings.TrimPrefix(m.Content, pf)
 	args := ParseArgs(command)
 
-	if rt := r.Find(args.Get(0)); rt != nil {
-
-		// Search through subroutes
-		if len(args) > 1 {
-			var i = 1
-			var r = rt
-			for _, v := range args[1:] {
-				nr := r.Find(v)
-				if nr == nil {
-					break
-				}
-				r = nr
-				i++
-			}
-			if r != nil {
-				// Merge all arguments up to the subroute
-				args = append(
-					[]string{
-						strings.Join(args[:i], string(separator)),
-					},
-					args[i:]...,
-				)
-				rt = r
-			}
-		}
-		if rt.Handler != nil {
-			ctx := NewContext(s, m, args, rt)
-			rt.Handler(ctx)
-		}
+	if rt, depth := r.FindFull(args...); depth > 0 {
+		args = append([]string{strings.Join(args[:depth], string(separator))}, args[depth:]...)
+		rt.Handler(NewContext(s, m, args, rt))
 	} else {
 		return dgrouter.ErrCouldNotFindRoute
 	}
