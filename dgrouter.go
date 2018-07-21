@@ -13,15 +13,10 @@ var (
 // HandlerFunc is a command handler
 type HandlerFunc func(interface{})
 
-// Router is a router
-type Router struct {
-	Routes []*Route
-}
-
 // On registers a route with the name you supply
 //    name    : name of the route to create
 //    handler : handler function
-func (r *Router) On(name string, handler HandlerFunc) *Route {
+func (r *Route) On(name string, handler HandlerFunc) *Route {
 	if rt := r.Find(name); rt != nil {
 		return rt
 	}
@@ -39,7 +34,7 @@ func (r *Router) On(name string, handler HandlerFunc) *Route {
 //    name    : name of the route to create
 //    regex   : regular expression to match
 //    handler : handler function for the route
-func (r *Router) OnReg(name, regex string, handler HandlerFunc) *Route {
+func (r *Route) OnReg(name, regex string, handler HandlerFunc) *Route {
 	if rt := r.Find(name); rt != nil {
 		return rt
 	}
@@ -56,7 +51,7 @@ func (r *Router) OnReg(name, regex string, handler HandlerFunc) *Route {
 // AddRoute adds a route to the router
 // Will return RouteAlreadyExists error on failure
 //    route : route to add
-func (r *Router) AddRoute(route *Route) error {
+func (r *Route) AddRoute(route *Route) error {
 	// Check if the route already exists
 	if rt := r.Find(route.Name); rt != nil {
 		return ErrRouteAlreadyExists
@@ -68,7 +63,7 @@ func (r *Router) AddRoute(route *Route) error {
 
 // RemoveRoute removes a route from the router
 //     route : route to remove
-func (r *Router) RemoveRoute(route *Route) error {
+func (r *Route) RemoveRoute(route *Route) error {
 	for i, v := range r.Routes {
 		if v == route {
 			r.Routes = append(r.Routes[:i], r.Routes[i+1:]...)
@@ -81,7 +76,7 @@ func (r *Router) RemoveRoute(route *Route) error {
 // Find finds a route with the given name
 // It will return nil if nothing is found
 //    name : name of route to find
-func (r *Router) Find(name string) *Route {
+func (r *Route) Find(name string) *Route {
 	for _, v := range r.Routes {
 		if v.Matcher(name) {
 			return v
@@ -90,9 +85,9 @@ func (r *Router) Find(name string) *Route {
 	return nil
 }
 
-// New returns a new router
-func New() *Router {
-	return &Router{
+// New returns a new route
+func New() *Route {
+	return &Route{
 		Routes: []*Route{},
 	}
 }

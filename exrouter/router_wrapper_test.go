@@ -19,8 +19,8 @@ func TestRouter(t *testing.T) {
 		"<@!botid>",
 	}
 
-	r := exrouter.Router{
-		Router: dgrouter.New(),
+	r := exrouter.Route{
+		Route: dgrouter.New(),
 	}
 
 	r.On("ping", func(ctx *exrouter.Context) {})
@@ -48,6 +48,10 @@ func TestRouter(t *testing.T) {
 		log.Println("Bot was mentioned")
 	})
 
+	// Set the default route for this router
+	// Will be triggered on bot mentions
+	r.Handler = mentionRoute.Handler
+
 	for _, v := range messages {
 		// Construct mock message
 		msg := &discordgo.Message{
@@ -59,7 +63,7 @@ func TestRouter(t *testing.T) {
 		}
 
 		// Attempt to find and execute the route for this message
-		err := r.FindAndExecute(nil, "!", "botid", msg, mentionRoute)
+		err := r.FindAndExecute(nil, "!", "botid", msg)
 		if err != nil {
 			t.Fail()
 		}

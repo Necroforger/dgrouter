@@ -36,6 +36,7 @@ func decodeFromFile(path string, v interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 	return json.NewDecoder(f).Decode(&v)
 }
 
@@ -87,7 +88,8 @@ func main() {
 		s.Unlock()
 	}).Desc("Stops the currently running stream")
 
-	helpRoute := router.On("help", func(ctx *exrouter.Context) {
+	// Create help route and set it to the default route for bot mentions
+	router.Default = router.On("help", func(ctx *exrouter.Context) {
 		var text = ""
 		var maxlen int
 		for _, v := range router.Routes {
@@ -103,7 +105,7 @@ func main() {
 
 	// Add message handler
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
-		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message, helpRoute)
+		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message)
 	})
 
 	err = s.Open()

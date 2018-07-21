@@ -33,7 +33,7 @@ func main() {
 		ctx.Reply(ctx.Msg.Author.AvatarURL("2048"))
 	}).Desc("returns the user's avatar")
 
-	helpRoute := router.On("help", func(ctx *exrouter.Context) {
+	router.Default = router.On("help", func(ctx *exrouter.Context) {
 		var text = ""
 		for _, v := range router.Routes {
 			text += v.Name + " : \t" + v.Description + "\n"
@@ -43,7 +43,7 @@ func main() {
 
 	// Add message handler
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
-		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message, helpRoute)
+		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message)
 	})
 
 	err = s.Open()

@@ -11,11 +11,15 @@ import (
 
 // Context represents a command context
 type Context struct {
+	// Route is the route that this command came from
 	Route *dgrouter.Route
 	Msg   *discordgo.Message
 	Ses   *discordgo.Session
-	Args  Args
 
+	// List of arguments supplied with the command
+	Args Args
+
+	// Vars that can be optionally set using the Set and Get functions
 	vmu  sync.RWMutex
 	Vars map[string]interface{}
 }

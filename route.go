@@ -2,6 +2,9 @@ package dgrouter
 
 // Route is a command route
 type Route struct {
+	// Routes is a slice of subroutes
+	Routes []*Route
+
 	Name        string
 	Description string
 	Category    string
@@ -12,6 +15,9 @@ type Route struct {
 
 	// Handler is the Handler for this route
 	Handler HandlerFunc
+
+	// Default route for responding to bot mentions
+	Default *Route
 }
 
 // Desc sets this routes description
