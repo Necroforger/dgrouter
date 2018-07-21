@@ -4,7 +4,7 @@ Example music bot using dca-rs to stream and transcode music
 - Plays music from youtube
 
 See the sounds directory for an example of how to include some media files.
-If the file extension ends in .json, the bot will create a command that will search youtube with the given parameters. The json should be in the form of
+If the file extension ends in .json, the bot will create a command that will use ytdl play the supplied youtube links. The json should be in the form of
 ```json
 [
 	["name", "youtube-url"],
