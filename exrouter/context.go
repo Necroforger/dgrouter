@@ -47,6 +47,24 @@ func (c *Context) ReplyEmbed(args ...interface{}) (*discordgo.Message, error) {
 	})
 }
 
+// Guild returns the guild the message came from
+func (c *Context) Guild() (*discordgo.Guild, error) {
+	g, err := c.Ses.State.Guild(c.Msg.GuildID)
+	if err != nil {
+		g, err = c.Ses.Guild(c.Msg.GuildID)
+	}
+	return g, err
+}
+
+// Channel returns the channel the message came from
+func (c *Context) Channel() (*discordgo.Channel, error) {
+	ch, err := c.Ses.State.Channel(c.Msg.ChannelID)
+	if err != nil {
+		ch, err = c.Ses.Channel(c.Msg.ChannelID)
+	}
+	return ch, err
+}
+
 // NewContext returns a new context from a message
 func NewContext(s *discordgo.Session, m *discordgo.Message, args Args, route *dgrouter.Route) *Context {
 	return &Context{
