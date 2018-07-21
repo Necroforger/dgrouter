@@ -78,15 +78,19 @@ func main() {
 	}
 
 	router.On("stop", func(ctx *exrouter.Context) {
+		stopStreaming(ctx.Msg.GuildID)
+	}).Desc("Stops the currently running stream")
+
+	router.On("leave", func(ctx *exrouter.Context) {
 		s.Lock()
 		if vc, ok := s.VoiceConnections[ctx.Msg.GuildID]; ok {
-			if v, ok := streams.Get(ctx.Msg.GuildID); ok {
-				v.(*streamSession).EncodeSession.Stop() // Stop the encode session if it is running
+			err := vc.Disconnect()
+			if err != nil {
+				ctx.Reply("error disconnecting from voice channel: ", err)
 			}
-			go vc.Disconnect()
 		}
 		s.Unlock()
-	}).Desc("Stops the currently running stream")
+	})
 
 	// Create help route and set it to the default route for bot mentions
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
@@ -188,11 +192,7 @@ func createMusicFunction(fpath string) func(ctx *exrouter.Context) {
 		streamer := dca.NewStream(encodeSession, vc, done)
 
 		// Stop any currently running stream
-		if v, ok := streams.Get(ctx.Msg.GuildID); ok {
-			log.Println("stopping existing streamer")
-			v.(*streamSession).EncodeSession.Stop()
-			v.(*streamSession).EncodeSession.Cleanup()
-		}
+		stopStreaming(vc.GuildID)
 
 		log.Println("Adding streaming to map")
 		streams.Set(ctx.Msg.GuildID, &streamSession{
@@ -259,11 +259,7 @@ func playYoutubeVideo(vc *discordgo.VoiceConnection, yurl string) error {
 	streamer := dca.NewStream(encodeSession, vc, done)
 
 	// Stop any currently running stream
-	if v, ok := streams.Get(vc.GuildID); ok {
-		log.Println("stopping existing streamer")
-		v.(*streamSession).EncodeSession.Stop()
-		v.(*streamSession).EncodeSession.Cleanup()
-	}
+	stopStreaming(vc.GuildID)
 
 	log.Println("Adding streaming to map")
 	streams.Set(vc.GuildID, &streamSession{
@@ -274,10 +270,21 @@ func playYoutubeVideo(vc *discordgo.VoiceConnection, yurl string) error {
 	if err := <-done; err != nil {
 		log.Println(err)
 		// Clean up incase something happened and ffmpeg is still running
-		encodeSession.Truncate()
+		encodeSession.Cleanup()
 	}
 
 	return nil
+}
+
+func stopStreaming(guildID string) {
+	if v, ok := streams.Get(guildID); ok {
+		// v.(*streamSession).EncodeSession.Cleanup()
+		err := v.(*streamSession).EncodeSession.Stop()
+		if err != nil {
+			log.Println("error stopping streaming session: ", err)
+		}
+		v.(*streamSession).EncodeSession.Cleanup()
+	}
 }
 
 // getVoiceConnection gets a bot's voice connection
