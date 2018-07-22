@@ -11,7 +11,7 @@ func TestRouter(t *testing.T) {
 	r := dgrouter.New()
 
 	r.On("ping", func(i interface{}) { log.Println("hello") }).Desc("Responds with pong").Cat("general")
-	r.OnReg("hello", "h.llo", nil).Desc("tests regular expressions").Cat("regex")
+	r.OnMatch("hello", dgrouter.NewRegexMatcher("h.llo"), nil).Desc("tests regular expressions").Cat("regex")
 
 	if rt := r.Find("ping"); rt != nil {
 		rt.Handler(nil)

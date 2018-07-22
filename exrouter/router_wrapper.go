@@ -10,6 +10,9 @@ import (
 // HandlerFunc ...
 type HandlerFunc func(*Context)
 
+// MiddlewareFunc is middleware
+type MiddlewareFunc func(HandlerFunc) HandlerFunc
+
 // Route wraps dgrouter.Router to use a Context
 type Route struct {
 	*dgrouter.Route
@@ -27,9 +30,32 @@ func (r *Route) On(name string, handler HandlerFunc) *Route {
 	return &Route{r.Route.On(name, WrapHandler(handler))}
 }
 
-// OnReg adds a route with a regular expression
-func (r *Route) OnReg(name string, reg string, handler HandlerFunc) *Route {
-	return &Route{r.Route.OnReg(name, reg, WrapHandler(handler))}
+// Group ...
+func (r *Route) Group(fn func(rt *Route)) *Route {
+	return &Route{r.Route.Group(func(r *dgrouter.Route) {
+		fn(&Route{r})
+	})}
+}
+
+// Use ...
+func (r *Route) Use(fn MiddlewareFunc) *Route {
+	return &Route{
+		r.Route.Use(WrapMiddleware(fn)),
+	}
+}
+
+// WrapMiddleware ...
+func WrapMiddleware(mware MiddlewareFunc) dgrouter.MiddlewareFunc {
+	return func(next dgrouter.HandlerFunc) dgrouter.HandlerFunc {
+		return func(i interface{}) {
+			WrapHandler(mware(UnwrapHandler(next)))(i)
+		}
+	}
+}
+
+// OnMatch registers a route with the given matcher
+func (r *Route) OnMatch(name string, matcher func(string) bool, handler HandlerFunc) *Route {
+	return &Route{r.Route.OnMatch(name, matcher, WrapHandler(handler))}
 }
 
 func mention(id string) string {
@@ -97,5 +123,12 @@ func WrapHandler(fn HandlerFunc) dgrouter.HandlerFunc {
 	}
 	return func(i interface{}) {
 		fn(i.(*Context))
+	}
+}
+
+// UnwrapHandler unwraps a handler
+func UnwrapHandler(fn dgrouter.HandlerFunc) HandlerFunc {
+	return func(ctx *Context) {
+		fn(ctx)
 	}
 }

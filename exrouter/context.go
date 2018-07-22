@@ -51,22 +51,31 @@ func (c *Context) ReplyEmbed(args ...interface{}) (*discordgo.Message, error) {
 	})
 }
 
-// Guild returns the guild the message came from
-func (c *Context) Guild() (*discordgo.Guild, error) {
-	g, err := c.Ses.State.Guild(c.Msg.GuildID)
+// Guild retrieves a guild from the state or restapi
+func (c *Context) Guild(guildID string) (*discordgo.Guild, error) {
+	g, err := c.Ses.State.Guild(guildID)
 	if err != nil {
-		g, err = c.Ses.Guild(c.Msg.GuildID)
+		g, err = c.Ses.Guild(guildID)
 	}
 	return g, err
 }
 
-// Channel returns the channel the message came from
-func (c *Context) Channel() (*discordgo.Channel, error) {
-	ch, err := c.Ses.State.Channel(c.Msg.ChannelID)
+// Channel retrieves a channel from the state or restapi
+func (c *Context) Channel(channelID string) (*discordgo.Channel, error) {
+	ch, err := c.Ses.State.Channel(channelID)
 	if err != nil {
-		ch, err = c.Ses.Channel(c.Msg.ChannelID)
+		ch, err = c.Ses.Channel(channelID)
 	}
 	return ch, err
+}
+
+// Member retrieves a member from the state or restapi
+func (c *Context) Member(guildID, userID string) (*discordgo.Member, error) {
+	m, err := c.Ses.State.Member(guildID, userID)
+	if err != nil {
+		m, err = c.Ses.GuildMember(guildID, userID)
+	}
+	return m, err
 }
 
 // NewContext returns a new context from a message

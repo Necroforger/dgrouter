@@ -18,6 +18,11 @@ type Route struct {
 
 	// Default route for responding to bot mentions
 	Default *Route
+
+	// The parent for this route
+	Parent *Route
+
+	Middleware []MiddlewareFunc
 }
 
 // Desc sets this routes description

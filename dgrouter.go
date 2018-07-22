@@ -13,39 +13,66 @@ var (
 // HandlerFunc is a command handler
 type HandlerFunc func(interface{})
 
+// MiddlewareFunc is a middleware
+type MiddlewareFunc func(HandlerFunc) HandlerFunc
+
+// Group allows you to do things like more easily manage categories
+// For example, setting the routes category in the callback will cause
+// All future added routes to inherit the category.
+// example:
+// Group(func (r *Route) {
+//    r.Cat("stuff")
+//    r.On("thing", nil).Desc("the category of this function will be stuff")
+// })
+func (r *Route) Group(fn func(r *Route)) *Route {
+	rt := New()
+	fn(rt)
+	for _, v := range rt.Routes {
+		r.AddRoute(v)
+	}
+	return r
+}
+
+// Use adds the given middleware func to this route's middleware chain
+func (r *Route) Use(fn MiddlewareFunc) *Route {
+	r.Middleware = append(r.Middleware, fn)
+	return r
+}
+
 // On registers a route with the name you supply
 //    name    : name of the route to create
 //    handler : handler function
 func (r *Route) On(name string, handler HandlerFunc) *Route {
-	if rt := r.Find(name); rt != nil {
-		return rt
-	}
-
-	route := &Route{}
-	route.Name = name
-	route.Matcher = NewNameMatcher(route)
-	route.Handler = handler
-
-	r.AddRoute(route)
-	return route
+	rt := r.OnMatch(name, nil, handler)
+	rt.Matcher = NewNameMatcher(rt)
+	return rt
 }
 
-// OnReg registers a route with the name and regular expression that you supply
-//    name    : name of the route to create
-//    regex   : regular expression to match
+// OnMatch adds a handler for the given route
+//    name    : name of the route to add
+//    matcher : matcher function used to match the route
 //    handler : handler function for the route
-func (r *Route) OnReg(name, regex string, handler HandlerFunc) *Route {
+func (r *Route) OnMatch(name string, matcher func(string) bool, handler HandlerFunc) *Route {
 	if rt := r.Find(name); rt != nil {
 		return rt
 	}
 
-	route := &Route{}
-	route.Name = name
-	route.Matcher = NewRegexMatcher(regex)
-	route.Handler = handler
+	nhandler := handler
 
-	r.AddRoute(route)
-	return route
+	// Add middleware to the handler
+	for _, v := range r.Middleware {
+		nhandler = v(nhandler)
+	}
+
+	rt := &Route{
+		Name:     name,
+		Category: r.Category,
+		Handler:  nhandler,
+		Matcher:  matcher,
+	}
+
+	r.AddRoute(rt)
+	return rt
 }
 
 // AddRoute adds a route to the router
@@ -57,6 +84,7 @@ func (r *Route) AddRoute(route *Route) error {
 		return ErrRouteAlreadyExists
 	}
 
+	route.Parent = r
 	r.Routes = append(r.Routes, route)
 	return nil
 }
