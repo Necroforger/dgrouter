@@ -34,8 +34,8 @@ func (r *Route) Group(fn func(r *Route)) *Route {
 }
 
 // Use adds the given middleware func to this route's middleware chain
-func (r *Route) Use(fn MiddlewareFunc) *Route {
-	r.Middleware = append(r.Middleware, fn)
+func (r *Route) Use(fn ...MiddlewareFunc) *Route {
+	r.Middleware = append(r.Middleware, fn...)
 	return r
 }
 
