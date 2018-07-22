@@ -23,6 +23,8 @@ type Route struct {
 	Parent *Route
 
 	Middleware []MiddlewareFunc
+
+	Aliases []string
 }
 
 // Desc sets this routes description
@@ -34,5 +36,11 @@ func (r *Route) Desc(description string) *Route {
 // Cat sets this route's category
 func (r *Route) Cat(category string) *Route {
 	r.Category = category
+	return r
+}
+
+// Alias appends aliases to this route's alias list
+func (r *Route) Alias(aliases ...string) *Route {
+	r.Aliases = append(r.Aliases, aliases...)
 	return r
 }

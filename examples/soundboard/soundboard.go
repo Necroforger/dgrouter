@@ -94,7 +94,7 @@ func main() {
 
 	router.On("yt", func(ctx *exrouter.Context) {
 		createYoutubeFunction(ctx.Args.Get(1))(ctx)
-	}).Desc("plays a youtube link")
+	}).Desc("plays a youtube link").Alias("youtube")
 
 	// Create help route and set it to the default route for bot mentions
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
@@ -237,9 +237,11 @@ func playYoutubeVideo(vc *discordgo.VoiceConnection, yurl string) error {
 
 	rd, wr := io.Pipe()
 	go func() {
-		err := info.Download(info.Formats.Best(ytdl.FormatAudioEncodingKey)[0], wr)
-		if err != nil {
-			log.Println(err)
+		if key := info.Formats.Best(ytdl.FormatAudioEncodingKey); len(key) != 0 {
+			err := info.Download(key[0], wr)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 		wr.Close()
 	}()
