@@ -92,6 +92,10 @@ func main() {
 		s.Unlock()
 	}).Desc("Leaves the current voice channel")
 
+	router.On("yt", func(ctx *exrouter.Context) {
+		createYoutubeFunction(ctx.Args.Get(1))(ctx)
+	}).Desc("plays a youtube link")
+
 	// Create help route and set it to the default route for bot mentions
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
 		var text = ""
