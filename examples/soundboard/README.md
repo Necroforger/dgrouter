@@ -1,5 +1,5 @@
 # soundboard
-Example music bot using dca-rs to stream and transcode music
+Example music bot using dca to stream and transcode music
 - Responds to mentions
 - Plays music from youtube
 
