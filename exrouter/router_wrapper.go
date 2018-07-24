@@ -78,7 +78,6 @@ func nickMention(id string) string {
 //    prefix       : prefix you want the bot to respond to
 //    botID        : user ID of the bot to allow you to substitute the bot ID for a prefix
 //    m            : discord message to pass to context
-//    mentionRoute : route to serve when the bot recieves nothing but a mention
 func (r *Route) FindAndExecute(s *discordgo.Session, prefix string, botID string, m *discordgo.Message) error {
 	var pf string
 
