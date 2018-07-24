@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 
+	"github.com/Necroforger/dgrouter"
+
 	"github.com/Necroforger/dgrouter/exrouter"
 	"github.com/bwmarrin/discordgo"
 )
@@ -32,6 +34,11 @@ func main() {
 	router.On("avatar", func(ctx *exrouter.Context) {
 		ctx.Reply(ctx.Msg.Author.AvatarURL("2048"))
 	}).Desc("returns the user's avatar")
+
+	// Match the regular expression user(name)?
+	router.OnMatch("username", dgrouter.NewRegexMatcher("user(name)?"), func(ctx *exrouter.Context) {
+		ctx.Reply("Your username is " + ctx.Msg.Author.Username)
+	})
 
 	router.Default = router.On("help", func(ctx *exrouter.Context) {
 		var text = ""
