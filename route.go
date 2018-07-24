@@ -6,6 +6,7 @@ type Route struct {
 	Routes []*Route
 
 	Name        string
+	Aliases     []string
 	Description string
 	Category    string
 
@@ -22,9 +23,8 @@ type Route struct {
 	// The parent for this route
 	Parent *Route
 
+	// Middleware to be applied when adding subroutes
 	Middleware []MiddlewareFunc
-
-	Aliases []string
 }
 
 // Desc sets this routes description

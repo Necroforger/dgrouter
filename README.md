@@ -1,8 +1,12 @@
 # dgrouter
+
 Router to simplify command routing in discord bots.
 [exrouter](https://github.com/Necroforger/dgrouter/tree/master/exrouter) provides some extra features like wrapping the router type to add command handlers which typecast to its own Context type.
 
 If you make any interesting changes feel free to submit a Pull Request
+
+- [exrouter godoc reference](https://godoc.org/github.com/Necroforger/dgrouter/exrouter)
+- [dgrouter godoc reference](https://godoc.org/github.com/Necroforger/dgrouter)
 
 ## Features
 
