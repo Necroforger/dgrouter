@@ -21,6 +21,14 @@ func getGuild(s *discordgo.Session, guildID string) (*discordgo.Guild, error) {
 	return guild, err
 }
 
+func getMember(s *discordgo.Session, guildID, userID string) (*discordgo.Member, error) {
+	member, err := s.State.Member(guildID, userID)
+	if err != nil {
+		return s.GuildMember(guildID, userID)
+	}
+	return member, err
+}
+
 // callCatch calls a catch function with an error
 func callCatch(ctx *exrouter.Context, fn CatchFunc, err error) {
 	if fn == nil {

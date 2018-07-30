@@ -28,3 +28,11 @@ func Channel(ctx *exrouter.Context) *discordgo.Channel {
 	}
 	return nil
 }
+
+// Member fetches the member from the context
+func Member(ctx *exrouter.Context) *discordgo.Member {
+	if v := ctx.Get(ctxMember); v != nil {
+		return v.(*discordgo.Member)
+	}
+	return nil
+}

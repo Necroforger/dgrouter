@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	ctxPrefix  = "middleware"
-	ctxError   = ctxPrefix + ".err"
-	ctxGuild   = ctxPrefix + ".guild"
-	ctxChannel = ctxPrefix + ".channel"
+	ctxPrefix  = "middleware."
+	ctxError   = ctxPrefix + "err"
+	ctxGuild   = ctxPrefix + "guild"
+	ctxChannel = ctxPrefix + "channel"
+	ctxMember  = ctxPrefix + "member"
 )
 
 // Errors
@@ -25,12 +26,10 @@ var (
 // Can be left as nil
 type CatchFunc func(ctx *exrouter.Context)
 
-// DefaultCatch is the default catch function
-func DefaultCatch() func(ctx *exrouter.Context) {
-	return func(ctx *exrouter.Context) {
-		if e := Err(ctx); e != nil {
-			ctx.Reply("error: ", e)
-		}
+// CatchDefault is the default catch function
+func CatchDefault(ctx *exrouter.Context) {
+	if e := Err(ctx); e != nil {
+		ctx.Reply("error: ", e)
 	}
 }
 
@@ -46,12 +45,13 @@ func UserCooldown(cooldown time.Duration, catch CatchFunc) exrouter.MiddlewareFu
 	// Table is a map of userIDs to a map of routes which store the last time they were called
 	// By a given user.
 	table := map[string]map[*dgrouter.Route]time.Time{}
+
 	return func(fn exrouter.HandlerFunc) exrouter.HandlerFunc {
 		return func(ctx *exrouter.Context) {
 			user, ok := table[ctx.Msg.Author.ID]
 			if !ok {
 				table[ctx.Msg.Author.ID] = map[*dgrouter.Route]time.Time{}
-				return
+				user = table[ctx.Msg.Author.ID]
 			}
 
 			// Retrieve the last time this command was used
@@ -122,6 +122,20 @@ func GetChannel(catch CatchFunc) exrouter.MiddlewareFunc {
 			}
 
 			ctx.Set(ctxChannel, channel)
+			fn(ctx)
+		}
+	}
+}
+
+// GetMember retrieves the member of the message sender
+func GetMember(catch CatchFunc) exrouter.MiddlewareFunc {
+	return func(fn exrouter.HandlerFunc) exrouter.HandlerFunc {
+		return func(ctx *exrouter.Context) {
+			member, err := getMember(ctx.Ses, ctx.Msg.GuildID, ctx.Msg.Author.ID)
+			if err != nil {
+				callCatch(ctx, catch, err)
+			}
+			ctx.Set(ctxMember, member)
 			fn(ctx)
 		}
 	}
