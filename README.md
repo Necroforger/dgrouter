@@ -6,6 +6,7 @@ Router to simplify command routing in discord bots.
 If you make any interesting changes feel free to submit a Pull Request
 
 - [exrouter godoc reference](https://godoc.org/github.com/Necroforger/dgrouter/exrouter)
+- [exmiddleware godoc reference](https://godoc.org/github.com/Necroforger/dgrouter/exmiddleware)
 - [dgrouter godoc reference](https://godoc.org/github.com/Necroforger/dgrouter)
 
 ## Features
