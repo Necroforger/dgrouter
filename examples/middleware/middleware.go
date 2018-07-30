@@ -84,8 +84,8 @@ func main() {
 			// Inserts the Guild in which the message came from into ctx.Data
 			exmiddleware.GetGuild(reply),
 
-			// Requires that the guild in which the message came from is an NSFW channel
-			// If there is an error, run the callback function replyNSFW
+			// Require that the message originates from an nsfw channel
+			// If there is an error, run the function replyNSFW
 			exmiddleware.RequireNSFW(replyNSFW),
 
 			// Enforce that the commands in this group can only be used once per 10 seconds per user
