@@ -96,7 +96,7 @@ func (r *Route) FindAndExecute(s *discordgo.Session, prefix string, botID string
 	}
 
 	switch {
-	case p(prefix):
+	case prefix != "" && p(prefix):
 		pf = prefix
 	case p(bmention):
 		pf = bmention
