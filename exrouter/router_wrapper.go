@@ -82,7 +82,7 @@ func (r *Route) FindAndExecute(s *discordgo.Session, prefix string, botID string
 	var pf string
 
 	// If the message content is only a bot mention and the mention route is not nil, send the mention route
-	if r.Default != nil && m.Content == mention(botID) || m.Content == nickMention(botID) {
+	if r.Default != nil && m.Content == mention(botID) || r.Default != nil && m.Content == nickMention(botID) {
 		r.Default.Handler(NewContext(s, m, []string{""}, r.Default))
 		return nil
 	}
