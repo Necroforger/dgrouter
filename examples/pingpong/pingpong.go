@@ -19,7 +19,7 @@ var (
 func main() {
 	flag.Parse()
 
-	s, err := discordgo.New(*fToken)
+	s, err := discordgo.New("Bot " + *fToken)
 	if err != nil {
 		log.Fatal(err)
 	}
