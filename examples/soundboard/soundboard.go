@@ -29,7 +29,15 @@ var (
 	fToken    = flag.String("t", "", "bot token")
 	fPrefix   = flag.String("p", "!", "bot prefix")
 	fSoundDir = flag.String("d", "sounds", "directory of sound files")
+	fWatch    = flag.Bool("watch", false, "watch the sound directory for changes")
 )
+
+func reply(ctx *exrouter.Context, args ...interface{}) {
+	_, err := ctx.Reply(args...)
+	if err != nil {
+		log.Println("error sending message: ", err)
+	}
+}
 
 func decodeFromFile(path string, v interface{}) error {
 	f, err := os.Open(path)
@@ -44,14 +52,7 @@ func trimExtension(p string) string {
 	return strings.TrimSuffix(p, filepath.Ext(p))
 }
 
-func main() {
-	flag.Parse()
-
-	s, err := discordgo.New(*fToken)
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func createRouter(s *discordgo.Session) *exrouter.Route {
 	router := exrouter.New()
 
 	// Create playback functions
@@ -86,7 +87,7 @@ func main() {
 		if vc, ok := s.VoiceConnections[ctx.Msg.GuildID]; ok {
 			err := vc.Disconnect()
 			if err != nil {
-				ctx.Reply("error disconnecting from voice channel: ", err)
+				reply(ctx, "error disconnecting from voice channel: ", err)
 			}
 		}
 		s.Unlock()
@@ -108,11 +109,27 @@ func main() {
 		for _, v := range router.Routes {
 			text += fmt.Sprintf("%-"+strconv.Itoa(maxlen+5)+"s:    %s\n", v.Name, v.Description)
 		}
-		ctx.Reply("```" + text + "```")
+		reply(ctx, "```"+text+"```")
 	}).Desc("prints this help menu")
+
+	return router
+}
+
+func main() {
+	flag.Parse()
+
+	s, err := discordgo.New(*fToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var rmu sync.RWMutex
+	router := createRouter(s)
 
 	// Add message handler
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
+		rmu.RLock()
+		defer rmu.RUnlock()
 		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message)
 	})
 
@@ -167,7 +184,7 @@ func createMusicFunction(fpath string) func(ctx *exrouter.Context) {
 	return func(ctx *exrouter.Context) {
 		vc, err := getVoiceConnection(ctx.Ses, ctx.Msg.Author.ID, ctx.Msg.GuildID)
 		if err != nil {
-			ctx.Reply("error obtaining voice connection")
+			reply(ctx, "error obtaining voice connection")
 			log.Println("error getting voice connection: ", err)
 			return
 		}
@@ -180,14 +197,14 @@ func createMusicFunction(fpath string) func(ctx *exrouter.Context) {
 
 		encodeSession, err := dca.EncodeFile(fpath, opts)
 		if err != nil {
-			ctx.Reply("error creating encode session")
+			reply(ctx, "error creating encode session")
 			log.Println("error creating encode session: ", err)
 			return
 		}
 
 		// set speaking to true
 		if err := vc.Speaking(true); err != nil {
-			ctx.Reply("could not set speaking to true")
+			reply(ctx, "could not set speaking to true")
 			return
 		}
 		defer vc.Speaking(false)
@@ -217,14 +234,14 @@ func createYoutubeFunction(yurl string) func(ctx *exrouter.Context) {
 	return func(ctx *exrouter.Context) {
 		vc, err := getVoiceConnection(ctx.Ses, ctx.Msg.Author.ID, ctx.Msg.GuildID)
 		if err != nil {
-			ctx.Reply("error obtaining voice connection")
+			reply(ctx, "error obtaining voice connection")
 			log.Println("error getting voice connection: ", err)
 			return
 		}
 
 		err = playYoutubeVideo(vc, yurl)
 		if err != nil {
-			ctx.Reply("error playing youtube video: ", err)
+			reply(ctx, "error playing youtube video: ", err)
 		}
 	}
 }
