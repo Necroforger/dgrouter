@@ -20,6 +20,8 @@ It should be installed to your path.
 
 ## Flags
 
+Remember to prefix your bot token with "Bot "
+
 | Flag | description |
 |------|-------------|
 | t    | bot token   |
