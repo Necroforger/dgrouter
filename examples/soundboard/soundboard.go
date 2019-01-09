@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/rylio/ytdl"
 
 	"github.com/jonas747/dca"
@@ -115,6 +116,43 @@ func createRouter(s *discordgo.Session) *exrouter.Route {
 	return router
 }
 
+func watchDirectory(dir string, fn func(fsnotify.Event)) *fsnotify.Watcher {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("modified file:", event.Name)
+				}
+				fn(event)
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	err = watcher.Add(dir)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Listening for changes in directory: " + dir)
+
+	return watcher
+}
+
 func main() {
 	flag.Parse()
 
@@ -125,6 +163,16 @@ func main() {
 
 	var rmu sync.RWMutex
 	router := createRouter(s)
+
+	// Rebuild the router when the sound directory is modified
+	if *fWatch {
+		watcher := watchDirectory(*fSoundDir, func(evt fsnotify.Event) {
+			rmu.Lock()
+			defer rmu.Unlock()
+			router = createRouter(s)
+		})
+		defer watcher.Close()
+	}
 
 	// Add message handler
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
