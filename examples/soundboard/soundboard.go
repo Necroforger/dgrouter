@@ -40,13 +40,42 @@ func reply(ctx *exrouter.Context, args ...interface{}) {
 	}
 }
 
-func decodeFromFile(path string, v interface{}) error {
+func decodeFromFile(path string, v *[][]string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	return json.NewDecoder(f).Decode(&v)
+
+	if strings.HasSuffix(path, ".txt") {
+		t, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		decodeFromString(string(t), v)
+	}
+
+	return json.NewDecoder(f).Decode(v)
+}
+
+func decodeFromString(txt string, v *[][]string) {
+	lines := strings.Split(txt, "\n")
+	for _, ln := range lines {
+		// Skip comments and empty lines
+		if strings.HasPrefix(ln, "#") || strings.TrimSpace(ln) == "" {
+			continue
+		}
+
+		// Split into space separated pairs
+		pair := strings.SplitN(ln, " ", 2)
+
+		// Trim the extra spaces
+		for i := 0; i < len(pair); i++ {
+			pair[i] = strings.TrimSpace(pair[i])
+		}
+
+		*v = append(*v, pair)
+	}
 }
 
 func trimExtension(p string) string {
@@ -65,7 +94,7 @@ func createRouter(s *discordgo.Session) *exrouter.Route {
 		if v.IsDir() {
 			continue
 		}
-		if filepath.Ext(v.Name()) == ".json" {
+		if filepath.Ext(v.Name()) == ".json" || filepath.Ext(v.Name()) == ".txt" {
 			var data = [][]string{}
 			decodeFromFile(path.Join(*fSoundDir, v.Name()), &data)
 			for _, d := range data {
@@ -178,7 +207,8 @@ func main() {
 	s.AddHandler(func(_ *discordgo.Session, m *discordgo.MessageCreate) {
 		rmu.RLock()
 		defer rmu.RUnlock()
-		router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message)
+		// TODO : allow handlers to be called in goroutines to fix race condition when hot-reloading
+		go router.FindAndExecute(s, *fPrefix, s.State.User.ID, m.Message)
 	})
 
 	err = s.Open()

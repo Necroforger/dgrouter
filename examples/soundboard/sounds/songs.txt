@@ -1,0 +1,7 @@
+# This is another method for adding commands that link to youtube videos
+# use space separated pairs each on a new line. file extension must be .txt
+
+# You don't have to put them in columns, but I do because it looks better.
+
+ghost_ship https://youtu.be/LBI3caejkGE
+scarlet2   https://youtu.be/ijXTen8q4W4
