@@ -22,7 +22,9 @@ It should be installed to your path.
 
 Remember to prefix your bot token with "Bot "
 
-| Flag | description |
-|------|-------------|
-| t    | bot token   |
-| p    | bot prefix  |
+| Flag  | description                |
+|-------|----------------------------|
+| t     | bot token                  |
+| p     | bot prefix                 |
+| d     | sound directory            |
+| watch | hot reload on file changes |
