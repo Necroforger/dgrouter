@@ -1,4 +1,4 @@
-package exrouter
+package disgordrouter
 
 import (
 	"strings"
