@@ -78,18 +78,19 @@ func nickMention(id string) string {
 //    prefix       : prefix you want the bot to respond to
 //    botID        : user ID of the bot to allow you to substitute the bot ID for a prefix
 //    m            : discord message to pass to context
-func (r *Route) FindAndExecute(s disgord.Session, prefix string, botID string, m *disgord.Message) error {
+func (r *Route) FindAndExecute(s disgord.Session, prefix string, botID disgord.Snowflake, m *disgord.Message) error {
 	var pf string
+	botIDStr := botID.String()
 
 	// If the message content is only a bot mention and the mention route is not nil, send the mention route
-	if r.Default != nil && m.Content == mention(botID) || r.Default != nil && m.Content == nickMention(botID) {
+	if r.Default != nil && m.Content == mention(botIDStr) || r.Default != nil && m.Content == nickMention(botIDStr) {
 		r.Default.Handler(NewContext(s, m, []string{""}, r.Default))
 		return nil
 	}
 
 	// Append a space to the mentions
-	bmention := mention(botID) + " "
-	nmention := nickMention(botID) + " "
+	bmention := mention(botIDStr) + " "
+	nmention := nickMention(botIDStr) + " "
 
 	p := func(t string) bool {
 		return strings.HasPrefix(m.Content, t)
