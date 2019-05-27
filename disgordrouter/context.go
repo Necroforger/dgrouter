@@ -43,8 +43,7 @@ func (c *Context) Get(key string) interface{} {
 
 // Reply replies to the sender with the given message
 func (c *Context) Reply(args ...interface{}) (*disgord.Message, error) {
-	Message, Error := c.Ses.SendMsg(c.Msg.ChannelID, fmt.Sprint(args...))
-	return Message, Error
+	return c.Ses.SendMsg(c.Msg.ChannelID, fmt.Sprint(args...))
 }
 
 // ReplyEmbed replies to the sender with an embed
