@@ -43,13 +43,13 @@ func (c *Context) Get(key string) interface{} {
 
 // Reply replies to the sender with the given message
 func (c *Context) Reply(args ...interface{}) (*disgord.Message, error) {
-	return c.Ses.SendMsgString(c.Msg.ChannelID, fmt.Sprint(args...))
+	return c.Ses.SendMsg(c.Msg.ChannelID, fmt.Sprint(args...))
 }
 
 // ReplyEmbed replies to the sender with an embed
 func (c *Context) ReplyEmbed(args ...interface{}) (*disgord.Message, error) {
-	return c.Ses.CreateChannelMessage(c.Msg.ChannelID, &disgord.CreateChannelMessageParams{
-		Embed: &disgord.ChannelEmbed{
+	return c.Ses.CreateMessage(c.Msg.ChannelID, &disgord.CreateMessageParams{
+		Embed: &disgord.Embed{
 			Description: fmt.Sprint(args...),
 		},
 	})
@@ -67,7 +67,7 @@ func (c *Context) Channel(channelID string) (*disgord.Channel, error) {
 
 // Member retrieves a member from the state or restapi
 func (c *Context) Member(guildID, userID string) (*disgord.Member, error) {
-	return c.Ses.GetGuildMember(snowflake.ParseSnowflakeString(guildID), snowflake.ParseSnowflakeString(userID))
+	return c.Ses.GetMember(snowflake.ParseSnowflakeString(guildID), snowflake.ParseSnowflakeString(userID))
 }
 
 // NewContext returns a new context from a message

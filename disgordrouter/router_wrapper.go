@@ -39,7 +39,7 @@ func (r *Route) Group(fn func(rt *Route)) *Route {
 
 // Use ...
 func (r *Route) Use(fn ...MiddlewareFunc) *Route {
-	wrapped := []dgrouter.MiddlewareFunc{}
+	var wrapped []dgrouter.MiddlewareFunc
 	for _, v := range fn {
 		wrapped = append(wrapped, WrapMiddleware(v))
 	}
