@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/andersfylling/snowflake"
+	"github.com/andersfylling/snowflake/v3"
 
 	"github.com/andersfylling/disgord"
 
