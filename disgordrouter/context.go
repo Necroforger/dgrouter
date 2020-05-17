@@ -1,6 +1,7 @@
 package disgordrouter
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -41,12 +42,12 @@ func (c *Context) Get(key string) interface{} {
 
 // Reply replies to the sender with the given message
 func (c *Context) Reply(args ...interface{}) (*disgord.Message, error) {
-	return c.Ses.SendMsg(c.Msg.ChannelID, fmt.Sprint(args...))
+	return c.Ses.SendMsg(context.Background(), c.Msg.ChannelID, fmt.Sprint(args...))
 }
 
 // ReplyEmbed replies to the sender with an embed
 func (c *Context) ReplyEmbed(args ...interface{}) (*disgord.Message, error) {
-	return c.Ses.CreateMessage(c.Msg.ChannelID, &disgord.CreateMessageParams{
+	return c.Ses.CreateMessage(context.Background(), c.Msg.ChannelID, &disgord.CreateMessageParams{
 		Embed: &disgord.Embed{
 			Description: fmt.Sprint(args...),
 		},
@@ -55,17 +56,17 @@ func (c *Context) ReplyEmbed(args ...interface{}) (*disgord.Message, error) {
 
 // Guild retrieves a guild from the state or restapi
 func (c *Context) Guild(guildID string) (*disgord.Guild, error) {
-	return c.Ses.GetGuild(disgord.ParseSnowflakeString(guildID))
+	return c.Ses.GetGuild(context.Background(), disgord.ParseSnowflakeString(guildID))
 }
 
 // Channel retrieves a channel from the state or restapi
 func (c *Context) Channel(channelID string) (*disgord.Channel, error) {
-	return c.Ses.GetChannel(disgord.ParseSnowflakeString(channelID))
+	return c.Ses.GetChannel(context.Background(), disgord.ParseSnowflakeString(channelID))
 }
 
 // Member retrieves a member from the state or restapi
 func (c *Context) Member(guildID, userID string) (*disgord.Member, error) {
-	return c.Ses.GetMember(disgord.ParseSnowflakeString(guildID), disgord.ParseSnowflakeString(userID))
+	return c.Ses.GetMember(context.Background(), disgord.ParseSnowflakeString(guildID), disgord.ParseSnowflakeString(userID))
 }
 
 // NewContext returns a new context from a message
